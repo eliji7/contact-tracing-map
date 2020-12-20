@@ -18,7 +18,7 @@
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="index.html" style="margin-left: 10px;">Amherst Covid Contact Tracing Tool</a>
+    <a class="navbar-brand" href="index.html">Covid Contact Tracing Map</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -35,16 +35,20 @@
     </div>
   </nav>
 
-  <p1> If you have tested positive for Covid, please take the time to report your previously visited locations. </p1>
+  <h6>Report Locations</h6>
+  <label style="margin-bottom: 10px;"> If you have tested positive for covid, please take the time to report your previously visited locations. </label>
   <br>
 
   <!-- Search input -->
-  <label>Location:</label>
-  <input id="searchInput" class="controls" type="text" placeholder="Enter a location" size="35">
+  <input id="searchInput" class="controls" type="text" placeholder="Enter a location here" size="50" style = "font-size: 160%; margin-left: 270px;">
   <!-- Google map -->
   <div id="map"></div>
 
-  <label>Approximate time visited:</label>
+  <label>Location:</label>
+  <label id='location' style="margin-left: 0px; margin-top: 10px; border:1px; border-style:solid; padding-left: 4px; padding-right: 4px">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+  <br>
+  <label style="margin-top: 10px;">Approximate time visited:</label>
   <select name="times-select" id="start-time">
     <option value="12:00 am">12:00 am</option>
     <option value="1:00 am">1:00 am</option>
@@ -72,7 +76,7 @@
     <option value="11:00 pm">11:00 pm</option>
   </select>
 
-  <label>to:</label>
+  <label style="margin-left: 0px;"> to:</label>
   <select name="times-select" id="end-time">
     <option value="12:00 am">12:00 am</option>
     <option value="1:00 am">1:00 am</option>
@@ -102,16 +106,17 @@
 
   <br>
 
-  <label>Date visited:</label>
-  <input type="date" id="date-visited" name="date" value="2020-12-19" placeholder="Choose a date">
-  <button type="button" onclick="getInputValues();">Submit</button>
-  <label id="status"></label>
+  <label style="margin-top: 10px;">Date visited:</label>
+  <input type="date" id="date-visited" name="date" value="2020-12-19" placeholder="Choose a date" style="margin-top: 10px;">
+  <button type="button" onclick="getInputValues();" style="margin-top: 10px;" >Submit</button>
+  <label id="status" style="margin-left: 0px; margin-top: 10px;"></label>
 
   <script
     src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCwnQVuHkfopK4dr23ab-ZnMhKicn1XBBQ&callback=initMap"
     async defer></script>
 
   <script>
+    var locName;
     var startTime;
     var endTime;
     var date;
@@ -139,8 +144,10 @@
         infowindow.close();
         marker.setVisible(false);
         var place = autocomplete.getPlace();
+        // set lat, lng, name
         latitude = place.geometry.location.lat();
         longitude = place.geometry.location.lng();;
+        locName = place.name;
         if (!place.geometry) {
           window.alert("Autocomplete's returned place contains no geometry");
           return;
@@ -174,6 +181,7 @@
 
         infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
         infowindow.open(map, marker);
+        document.getElementById('location').innerHTML = place.formatted_address;
       });
     }
 
@@ -183,25 +191,23 @@
       date = document.getElementById("date-visited").value;
       if (latitude == undefined || longitude == undefined) {
         document.getElementById("status").innerHTML = "Please enter a valid location!";
-        localStorage.removeItem("markers");
+        //localStorage.removeItem("markers");
       } else {
         document.getElementById("status").innerHTML = "Report recieved! A marker has been added to the map!";
-        addMarker(startTime, endTime, date, latitude, longitude);
+        addMarker(locName, startTime, endTime, date, latitude, longitude);
       }
     }
 
-    function addMarker(startTime, endTime, date, lat, lng) {
+    function addMarker(name, startTime, endTime, date, lat, lng) {
       if (localStorage.getItem("markers") == undefined) {
         markers = [];
-        markers.push({ "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
+        markers.push({"name" : name, "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
         localStorage.setItem("markers", JSON.stringify(markers));
-        console.log(localStorage.getItem("markers"));
       }
       else {
         markers = JSON.parse(localStorage.getItem("markers"))
-        markers.push({ "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
+        markers.push({"name" : name, "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
         localStorage.setItem("markers", JSON.stringify(markers));
-        console.log(localStorage.getItem("markers"));
       }
     }
   </script>
