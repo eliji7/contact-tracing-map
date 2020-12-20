@@ -36,6 +36,178 @@
   </nav>
 
   <p1> If you have tested positive for Covid, please take the time to report your previously visited locations. </p1>
+  <br>
+
+  <!-- Search input -->
+  <label>Location:</label>
+  <input id="searchInput" class="controls" type="text" placeholder="Enter a location" size="35">
+  <!-- Google map -->
+  <div id="map"></div>
+
+  <label>Approximate time visited:</label>
+  <select name="times-select" id="start-time">
+    <option value="12:00 am">12:00 am</option>
+    <option value="1:00 am">1:00 am</option>
+    <option value="2:00 am">2:00 am</option>
+    <option value="3:00 am">3:00 am</option>
+    <option value="4:00 am">4:00 am</option>
+    <option value="5:00 am">5:00 am</option>
+    <option value="6:00 am">6:00 am</option>
+    <option value="7:00 am">7:00 am</option>
+    <option value="8:00 am">8:00 am</option>
+    <option value="9:00 am">9:00 am</option>
+    <option value="10:00 am">10:00 am</option>
+    <option value="11:00 am">11:00 am</option>
+    <option value="12:00 pm">12:00 pm</option>
+    <option value="1:00 pm">1:00 pm</option>
+    <option value="2:00 pm">2:00 pm</option>
+    <option value="3:00 pm">3:00 pm</option>
+    <option value="4:00 pm">4:00 pm</option>
+    <option value="5:00 pm">5:00 pm</option>
+    <option value="6:00 pm">6:00 pm</option>
+    <option value="7:00 pm">7:00 pm</option>
+    <option value="8:00 pm">8:00 pm</option>
+    <option value="9:00 pm">9:00 pm</option>
+    <option value="10:00 pm">10:00 pm</option>
+    <option value="11:00 pm">11:00 pm</option>
+  </select>
+
+  <label>to:</label>
+  <select name="times-select" id="end-time">
+    <option value="12:00 am">12:00 am</option>
+    <option value="1:00 am">1:00 am</option>
+    <option value="2:00 am">2:00 am</option>
+    <option value="3:00 am">3:00 am</option>
+    <option value="4:00 am">4:00 am</option>
+    <option value="5:00 am">5:00 am</option>
+    <option value="6:00 am">6:00 am</option>
+    <option value="7:00 am">7:00 am</option>
+    <option value="8:00 am">8:00 am</option>
+    <option value="9:00 am">9:00 am</option>
+    <option value="10:00 am">10:00 am</option>
+    <option value="11:00 am">11:00 am</option>
+    <option value="12:00 pm">12:00 pm</option>
+    <option value="1:00 pm">1:00 pm</option>
+    <option value="2:00 pm">2:00 pm</option>
+    <option value="3:00 pm">3:00 pm</option>
+    <option value="4:00 pm">4:00 pm</option>
+    <option value="5:00 pm">5:00 pm</option>
+    <option value="6:00 pm">6:00 pm</option>
+    <option value="7:00 pm">7:00 pm</option>
+    <option value="8:00 pm">8:00 pm</option>
+    <option value="9:00 pm">9:00 pm</option>
+    <option value="10:00 pm">10:00 pm</option>
+    <option value="11:00 pm">11:00 pm</option>
+  </select>
+
+  <br>
+
+  <label>Date visited:</label>
+  <input type="date" id="date-visited" name="date" value="2020-12-19" placeholder="Choose a date">
+  <button type="button" onclick="getInputValues();">Submit</button>
+  <label id="status"></label>
+
+  <script
+    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCwnQVuHkfopK4dr23ab-ZnMhKicn1XBBQ&callback=initMap"
+    async defer></script>
+
+  <script>
+    var startTime;
+    var endTime;
+    var date;
+    var latitude;
+    var longitude;
+
+    function initMap() {
+      var map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 42.3732, lng: -72.5199 },
+        zoom: 13
+      });
+      var input = document.getElementById('searchInput');
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+      var autocomplete = new google.maps.places.Autocomplete(input);
+      autocomplete.bindTo('bounds', map);
+
+      var infowindow = new google.maps.InfoWindow();
+      var marker = new google.maps.Marker({
+        map: map,
+        anchorPoint: new google.maps.Point(0, -29)
+      });
+
+      autocomplete.addListener('place_changed', function () {
+        infowindow.close();
+        marker.setVisible(false);
+        var place = autocomplete.getPlace();
+        latitude = place.geometry.location.lat();
+        longitude = place.geometry.location.lng();;
+        if (!place.geometry) {
+          window.alert("Autocomplete's returned place contains no geometry");
+          return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+          map.fitBounds(place.geometry.viewport);
+        } else {
+          map.setCenter(place.geometry.location);
+          map.setZoom(17);
+        }
+        marker.setIcon(({
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(35, 35)
+        }));
+        marker.setPosition(place.geometry.location);
+        marker.setVisible(true);
+
+        var address = '';
+        if (place.address_components) {
+          address = [
+            (place.address_components[0] && place.address_components[0].short_name || ''),
+            (place.address_components[1] && place.address_components[1].short_name || ''),
+            (place.address_components[2] && place.address_components[2].short_name || '')
+          ].join(' ');
+        }
+
+        infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+        infowindow.open(map, marker);
+      });
+    }
+
+    function getInputValues() {
+      startTime = document.getElementById("start-time").value;
+      endTime = document.getElementById("end-time").value;
+      date = document.getElementById("date-visited").value;
+      if (latitude == undefined || longitude == undefined) {
+        document.getElementById("status").innerHTML = "Please enter a valid location!";
+        localStorage.removeItem("markers");
+      } else {
+        document.getElementById("status").innerHTML = "Report recieved! A marker has been added to the map!";
+        addMarker(startTime, endTime, date, latitude, longitude);
+      }
+    }
+
+    function addMarker(startTime, endTime, date, lat, lng) {
+      if (localStorage.getItem("markers") == undefined) {
+        markers = [];
+        markers.push({ "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
+        localStorage.setItem("markers", JSON.stringify(markers));
+        console.log(localStorage.getItem("markers"));
+      }
+      else {
+        markers = JSON.parse(localStorage.getItem("markers"))
+        markers.push({ "startTime": startTime, "endTime": endTime, "date": date, "lat": lat, "lng": lng })
+        localStorage.setItem("markers", JSON.stringify(markers));
+        console.log(localStorage.getItem("markers"));
+      }
+    }
+  </script>
+  <!-- <script
+    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCwnQVuHkfopK4dr23ab-ZnMhKicn1XBBQ&callback=initMap"
+    async defer></script> -->
 
   <!-- Optional JavaScript; choose one of the two! -->
 

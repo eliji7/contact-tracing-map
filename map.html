@@ -37,10 +37,39 @@
 
   <h5>Contact Tracing Map</h5>
 
-  <div id="map-container-google-2" class="z-depth-1-half map-container" style="height: 500px">
-    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1gZO3NcT5Q14BaQo282Da9Y_wQM4cdOqP" width="640"
-      height="480"></iframe>  
-  </div>
+  <div id="map"></div>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwnQVuHkfopK4dr23ab-ZnMhKicn1XBBQ&callback=initMap&libraries=&v=weekly"
+    defer></script>
+
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 14,
+        center: { lat: 42.3732, lng: -72.5199 },
+      });
+      markers = JSON.parse(localStorage.getItem("markers"));
+      console.log(localStorage.getItem("markers"));
+      // add markers to map
+      console.log(markers.length);
+      if (markers != null) {
+        for (var i = 0; i < markers.length; i++) {
+          const info = "Visited on " + markers[i].date + " from " + markers[i].startTime + " to " + markers[i].endTime + ".";
+          const infowindow = new google.maps.InfoWindow({
+            content: info,
+          })
+          const marker = new google.maps.Marker({
+            position: { "lat": markers[i].lat, "lng": markers[i].lng },
+            map,
+            title: "covid marker",
+          });
+          marker.addListener("click", () => {
+            infowindow.open(map, marker);
+          });
+        }
+      }
+    }
+  </script>
 
   <!-- Optional JavaScript; choose one of the two! -->
 
